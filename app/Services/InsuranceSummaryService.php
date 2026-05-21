@@ -42,38 +42,73 @@ public function getInsuranceSummary(int $csvImportId)
         ->get();
 }
 
-public function getOriginSummary(int $csvImportId)
-{
-    return InsuranceTransaction::query()
+    public function getOriginSummary(int $csvImportId)
+    {
+        return InsuranceTransaction::query()
 
-        ->where('csv_import_id', $csvImportId)
+            ->where('csv_import_id', $csvImportId)
 
-        ->selectRaw('
-            origem,
+            ->selectRaw('
+                origem,
 
-            SUM(
-                CASE
-                    WHEN valor_recebido > 0
-                    THEN valor_recebido
-                    ELSE 0
-                END
-            ) as recebimentos,
+                SUM(
+                    CASE
+                        WHEN valor_recebido > 0
+                        THEN valor_recebido
+                        ELSE 0
+                    END
+                ) as recebimentos,
 
-            SUM(
-                CASE
-                    WHEN valor_recebido < 0
-                    THEN valor_recebido
-                    ELSE 0
-                END
-            ) as pagamentos,
+                SUM(
+                    CASE
+                        WHEN valor_recebido < 0
+                        THEN valor_recebido
+                        ELSE 0
+                    END
+                ) as pagamentos,
 
-            SUM(valor_recebido) as liquido
-        ')
+                SUM(valor_recebido) as liquido
+            ')
 
-        ->groupBy('origem')
+            ->groupBy('origem')
 
-        ->orderBy('origem')
+            ->orderBy('origem')
 
-        ->get();
-}
+            ->get();
+    }
+
+    public function getProducerSummary(int $csvImportId)
+    {
+        return InsuranceTransaction::query()
+
+            ->where('csv_import_id', $csvImportId)
+
+            ->selectRaw('
+                produtor,
+
+                SUM(
+                    CASE
+                        WHEN valor_recebido > 0
+                        THEN valor_recebido
+                        ELSE 0
+                    END
+                ) as recebimentos,
+
+                SUM(
+                    CASE
+                        WHEN valor_recebido < 0
+                        THEN valor_recebido
+                        ELSE 0
+                    END
+                ) as pagamentos,
+
+                SUM(valor_recebido) as liquido
+            ')
+
+            ->groupBy('produtor')
+
+            ->orderBy('produtor')
+
+            ->get();
+    }
 }

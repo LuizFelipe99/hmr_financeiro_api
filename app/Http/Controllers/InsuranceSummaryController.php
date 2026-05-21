@@ -53,4 +53,20 @@ class InsuranceSummaryController extends Controller
                 ->getOriginSummary($csvImportId)
         );
     }
+
+    public function producerSummary(?int $csvImportId = null)
+    {
+        if (!$csvImportId) {
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Id da importação é obrigatório'
+            ], 400);
+        }
+
+        return response()->json(
+            $this->insuranceSummaryService
+                ->getProducerSummary($csvImportId)
+        );
+    }
 }
