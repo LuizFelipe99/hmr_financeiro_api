@@ -28,6 +28,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/origin-summary/{csvImportId?}',[InsuranceSummaryController::class, 'originSummary']);
     Route::get('/producer-summary/{csvImportId?}',[InsuranceSummaryController::class, 'producerSummary']);
     Route::get('/partner-summary/{csvImportId?}',[InsuranceSummaryController::class, 'partnerSummary']);
+    Route::get('/ramo-summary/{csvImportId?}',[InsuranceSummaryController::class, 'ramoSummary']);
     
 
 });

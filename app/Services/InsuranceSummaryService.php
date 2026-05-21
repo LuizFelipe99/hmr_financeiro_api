@@ -112,7 +112,7 @@ public function getInsuranceSummary(int $csvImportId)
             ->get();
     }
 
-      public function getPartnerSummary(int $csvImportId)
+    public function getPartnerSummary(int $csvImportId)
     {
         return InsuranceTransaction::query()
 
@@ -143,6 +143,41 @@ public function getInsuranceSummary(int $csvImportId)
             ->groupBy('parceiro')
 
             ->orderBy('parceiro')
+
+            ->get();
+    }
+
+        public function getRamoSummary(int $csvImportId)
+    {
+        return InsuranceTransaction::query()
+
+            ->where('csv_import_id', $csvImportId)
+
+            ->selectRaw('
+                ramo,
+
+                SUM(
+                    CASE
+                        WHEN valor_recebido > 0
+                        THEN valor_recebido
+                        ELSE 0
+                    END
+                ) as recebimentos,
+
+                SUM(
+                    CASE
+                        WHEN valor_recebido < 0
+                        THEN valor_recebido
+                        ELSE 0
+                    END
+                ) as pagamentos,
+
+                SUM(valor_recebido) as liquido
+            ')
+
+            ->groupBy('ramo')
+
+            ->orderBy('ramo')
 
             ->get();
     }
