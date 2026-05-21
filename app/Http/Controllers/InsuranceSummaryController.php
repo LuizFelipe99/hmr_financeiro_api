@@ -69,4 +69,20 @@ class InsuranceSummaryController extends Controller
                 ->getProducerSummary($csvImportId)
         );
     }
+
+    public function partnerSummary(?int $csvImportId = null)
+    {
+        if (!$csvImportId) {
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Id da importação é obrigatório'
+            ], 400);
+        }
+
+        return response()->json(
+            $this->insuranceSummaryService
+                ->getPartnerSummary($csvImportId)
+        );
+    }
 }
