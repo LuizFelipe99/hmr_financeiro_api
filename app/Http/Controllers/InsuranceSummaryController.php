@@ -13,7 +13,52 @@ class InsuranceSummaryController extends Controller
     ) {}
 
 
-    public function index(?int $csvImportId = null)
+    public function index( Request $request, ?int $csvImportId = null) {
+
+        if (!$csvImportId) {
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Id da importação é obrigatório'
+            ], 400);
+        }
+
+        $csvImport = CsvImport::find($csvImportId);
+
+        if (!$csvImport) {
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Importação não encontrada'
+            ], 404);
+        }
+
+        $request->validate([
+            'data_inicio' => 'nullable|date',
+            'data_fim'    => 'nullable|date|after_or_equal:data_inicio',
+        ]);
+
+        return response()->json(
+
+            $this->insuranceSummaryService
+                ->getInsuranceSummary(
+                    $csvImportId,
+                    $request->data_inicio,
+                    $request->data_fim
+                )
+
+        );
+    }
+
+
+
+
+    
+
+    public function originSummary(
+        Request $request,
+        ?int $csvImportId = null
+    )
     {
         if (!$csvImportId) {
 
@@ -33,15 +78,26 @@ class InsuranceSummaryController extends Controller
             ], 404);
         }
 
+        $request->validate([
+            'data_inicio' => 'nullable|date',
+            'data_fim'    => 'nullable|date|after_or_equal:data_inicio',
+        ]);
+
         return response()->json(
+
             $this->insuranceSummaryService
-                ->getInsuranceSummary($csvImportId)
+                ->getOriginSummary(
+                    $csvImportId,
+                    $request->data_inicio,
+                    $request->data_fim
+                )
+
         );
     }
 
-    public function originSummary(?int $csvImportId = null)
+    public function producerSummary(Request $request, ?int $csvImportId = null)
     {
-        if (!$csvImportId) {
+       if (!$csvImportId) {
 
             return response()->json([
                 'status' => 'error',
@@ -49,15 +105,36 @@ class InsuranceSummaryController extends Controller
             ], 400);
         }
 
+        $csvImport = CsvImport::find($csvImportId);
+
+        if (!$csvImport) {
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Importação não encontrada'
+            ], 404);
+        }
+
+        $request->validate([
+            'data_inicio' => 'nullable|date',
+            'data_fim'    => 'nullable|date|after_or_equal:data_inicio',
+        ]);
+
         return response()->json(
+
             $this->insuranceSummaryService
-                ->getOriginSummary($csvImportId)
+                ->getProducerSummary(
+                    $csvImportId,
+                    $request->data_inicio,
+                    $request->data_fim
+                )
+
         );
     }
 
-    public function producerSummary(?int $csvImportId = null)
+    public function partnerSummary(Request $request, ?int $csvImportId = null)
     {
-        if (!$csvImportId) {
+       if (!$csvImportId) {
 
             return response()->json([
                 'status' => 'error',
@@ -65,15 +142,36 @@ class InsuranceSummaryController extends Controller
             ], 400);
         }
 
+        $csvImport = CsvImport::find($csvImportId);
+
+        if (!$csvImport) {
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Importação não encontrada'
+            ], 404);
+        }
+
+        $request->validate([
+            'data_inicio' => 'nullable|date',
+            'data_fim'    => 'nullable|date|after_or_equal:data_inicio',
+        ]);
+
         return response()->json(
+
             $this->insuranceSummaryService
-                ->getProducerSummary($csvImportId)
+                ->getPartnerSummary(
+                    $csvImportId,
+                    $request->data_inicio,
+                    $request->data_fim
+                )
+
         );
     }
 
-    public function partnerSummary(?int $csvImportId = null)
+    public function ramoSummary(Request $request, ?int $csvImportId = null)
     {
-        if (!$csvImportId) {
+       if (!$csvImportId) {
 
             return response()->json([
                 'status' => 'error',
@@ -81,25 +179,30 @@ class InsuranceSummaryController extends Controller
             ], 400);
         }
 
-        return response()->json(
-            $this->insuranceSummaryService
-                ->getPartnerSummary($csvImportId)
-        );
-    }
+        $csvImport = CsvImport::find($csvImportId);
 
-    public function ramoSummary(?int $csvImportId = null)
-    {
-        if (!$csvImportId) {
+        if (!$csvImport) {
 
             return response()->json([
                 'status' => 'error',
-                'message' => 'Id da importação é obrigatório'
-            ], 400);
+                'message' => 'Importação não encontrada'
+            ], 404);
         }
 
+        $request->validate([
+            'data_inicio' => 'nullable|date',
+            'data_fim'    => 'nullable|date|after_or_equal:data_inicio',
+        ]);
+
         return response()->json(
+
             $this->insuranceSummaryService
-                ->getRamoSummary($csvImportId)
+                ->getRamoSummary(
+                    $csvImportId,
+                    $request->data_inicio,
+                    $request->data_fim
+                )
+
         );
     }
 

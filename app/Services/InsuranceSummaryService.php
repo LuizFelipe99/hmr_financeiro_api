@@ -7,46 +7,69 @@ use Illuminate\Support\Collection;
 
 class InsuranceSummaryService
 {
-public function getInsuranceSummary(int $csvImportId)
-{
-    return InsuranceTransaction::query()
-
-        ->where('csv_import_id', $csvImportId)
-
-        ->selectRaw('
-            seguradora,
-
-            SUM(
-                CASE
-                    WHEN valor_recebido > 0
-                    THEN valor_recebido
-                    ELSE 0
-                END
-            ) as recebimentos,
-
-            SUM(
-                CASE
-                    WHEN valor_recebido < 0
-                    THEN valor_recebido
-                    ELSE 0
-                END
-            ) as pagamentos,
-
-            SUM(valor_recebido) as liquido
-        ')
-
-        ->groupBy('seguradora')
-
-        ->orderBy('seguradora')
-
-        ->get();
-}
-
-    public function getOriginSummary(int $csvImportId)
+    public function getInsuranceSummary(
+        int $csvImportId,
+        ?string $dataInicio = null,
+        ?string $dataFim = null
+    )
     {
-        return InsuranceTransaction::query()
+        $query = InsuranceTransaction::query()
 
-            ->where('csv_import_id', $csvImportId)
+            ->where('csv_import_id', $csvImportId);
+
+        $this->applyDateFilter(
+            $query,
+            $dataInicio,
+            $dataFim
+        );
+
+        return $query
+
+            ->selectRaw('
+                seguradora,
+
+                SUM(
+                    CASE
+                        WHEN valor_recebido > 0
+                        THEN valor_recebido
+                        ELSE 0
+                    END
+                ) as recebimentos,
+
+                SUM(
+                    CASE
+                        WHEN valor_recebido < 0
+                        THEN valor_recebido
+                        ELSE 0
+                    END
+                ) as pagamentos,
+
+                SUM(valor_recebido) as liquido
+            ')
+
+            ->groupBy('seguradora')
+
+            ->orderBy('seguradora')
+
+            ->get();
+    }
+    public function getOriginSummary(
+        int $csvImportId,
+        ?string $dataInicio = null,
+        ?string $dataFim = null
+    )
+    {
+        $query = InsuranceTransaction::query()
+
+            ->where('csv_import_id', $csvImportId);
+
+        $this->applyDateFilter(
+            $query,
+            $dataInicio,
+            $dataFim
+        );
+
+        return $query
 
             ->selectRaw('
                 origem,
@@ -77,11 +100,23 @@ public function getInsuranceSummary(int $csvImportId)
             ->get();
     }
 
-    public function getProducerSummary(int $csvImportId)
+    public function getProducerSummary(
+        int $csvImportId,
+        ?string $dataInicio = null,
+        ?string $dataFim = null
+    )
     {
-        return InsuranceTransaction::query()
+        $query = InsuranceTransaction::query()
 
-            ->where('csv_import_id', $csvImportId)
+            ->where('csv_import_id', $csvImportId);
+
+        $this->applyDateFilter(
+            $query,
+            $dataInicio,
+            $dataFim
+        );
+
+        return $query
 
             ->selectRaw('
                 produtor,
@@ -112,11 +147,23 @@ public function getInsuranceSummary(int $csvImportId)
             ->get();
     }
 
-    public function getPartnerSummary(int $csvImportId)
+    public function getPartnerSummary(
+        int $csvImportId,
+        ?string $dataInicio = null,
+        ?string $dataFim = null
+    )
     {
-        return InsuranceTransaction::query()
+        $query = InsuranceTransaction::query()
 
-            ->where('csv_import_id', $csvImportId)
+            ->where('csv_import_id', $csvImportId);
+
+        $this->applyDateFilter(
+            $query,
+            $dataInicio,
+            $dataFim
+        );
+
+        return $query
 
             ->selectRaw('
                 parceiro,
@@ -147,11 +194,23 @@ public function getInsuranceSummary(int $csvImportId)
             ->get();
     }
 
-        public function getRamoSummary(int $csvImportId)
+        public function getRamoSummary(
+        int $csvImportId,
+        ?string $dataInicio = null,
+        ?string $dataFim = null
+    )
     {
-        return InsuranceTransaction::query()
+        $query = InsuranceTransaction::query()
 
-            ->where('csv_import_id', $csvImportId)
+            ->where('csv_import_id', $csvImportId);
+
+        $this->applyDateFilter(
+            $query,
+            $dataInicio,
+            $dataFim
+        );
+
+        return $query
 
             ->selectRaw('
                 ramo,
@@ -213,5 +272,22 @@ public function getInsuranceSummary(int $csvImportId)
             ->orderBy('data')
 
             ->get();
+    }
+
+
+
+    //helper filter date
+    private function applyDateFilter($query,?string $dataInicio,?string $dataFim) {
+
+        if ($dataInicio && $dataFim) {
+
+            $query->whereBetween('data_vencimento', [
+                $dataInicio,
+                $dataFim
+            ]);
+
+        }
+
+        return $query;
     }
 }
