@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Models\InsuranceTransaction;
-use Illuminate\Support\Collection;
+use Illuminate\Support\Collection;  
 
 class InsuranceSummaryService
 {
@@ -178,6 +178,39 @@ public function getInsuranceSummary(int $csvImportId)
             ->groupBy('ramo')
 
             ->orderBy('ramo')
+
+            ->get();
+    }
+
+    public function getSummaryByDateRange(int $csvImportId, string $dataInicio, string $dataFim): Collection {
+        return InsuranceTransaction::query()
+            ->where('csv_import_id', $csvImportId)
+            ->whereBetween('data_vencimento', [
+                $dataInicio,
+                $dataFim
+            ])
+            ->selectRaw('
+                DATE(data_vencimento) as data,
+                SUM(
+                    CASE
+                        WHEN valor_recebido > 0
+                        THEN valor_recebido
+                        ELSE 0
+                    END
+                ) as recebimentos,
+                SUM(
+                    CASE
+                        WHEN valor_recebido < 0
+                        THEN valor_recebido
+                        ELSE 0
+                    END
+                ) as pagamentos,
+                SUM(valor_recebido) as liquido
+            ')
+
+            ->groupBy('data')
+
+            ->orderBy('data')
 
             ->get();
     }
