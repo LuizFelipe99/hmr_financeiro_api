@@ -15,7 +15,7 @@ class CsvImportController extends Controller
     public function store(Request $request): JsonResponse
     {
         $request->validate([
-            'file' => 'required|file|mimes:csv,txt',
+            'file' => 'required|file|mimes:csv,txt,xls',
         ]);
 
         $results = $this->csvImportService->importUsersFromCsv(

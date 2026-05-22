@@ -9,6 +9,11 @@ use App\Http\Controllers\InsuranceSummaryController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::get('/debug-transactions', function () {
+    return response()->json(
+        \App\Models\InsuranceTransaction::limit(3)->get()
+    );
+});
 
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -35,8 +40,3 @@ Route::middleware('auth:sanctum')->group(function () {
 
 });
 
-Route::get('/debug-transactions', function () {
-    return response()->json(
-        \App\Models\InsuranceTransaction::limit(3)->get()
-    );
-});
