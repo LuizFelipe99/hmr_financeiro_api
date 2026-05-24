@@ -324,7 +324,8 @@ public function getNewCustomersSummary(
         $dataFim
     );
 
-    $clientes = $query
+    // CLIENTES INDIVIDUAIS
+    $clientes = (clone $query)
 
         ->select([
             'seguradora',
@@ -337,11 +338,30 @@ public function getNewCustomersSummary(
 
         ->get();
 
+    // RESUMO POR SEGURADORA
+    $seguradoras = (clone $query)
+
+        ->selectRaw('
+            seguradora,
+            COUNT(*) as total_clientes,
+            SUM(valor_recebido) as valor_total
+        ')
+
+        ->groupBy('seguradora')
+
+        ->orderByDesc('valor_total')
+
+        ->get();
+
     $totalGeral = $clientes->sum('valor_recebido');
 
     return [
 
         'total_geral' => round($totalGeral, 2),
+
+        'total_clientes' => $clientes->count(),
+
+        'seguradoras' => $seguradoras,
 
         'clientes' => $clientes
 
