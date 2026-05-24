@@ -226,7 +226,7 @@ class InsuranceSummaryController extends Controller
         );
     }
 
-    public function newCustomersSummary(
+public function newCustomersSummary(
     Request $request,
     ?int $csvImportId = null
 )
@@ -250,6 +250,7 @@ class InsuranceSummaryController extends Controller
     }
 
     $request->validate([
+        'group_by'   => 'nullable|string',
         'data_inicio' => 'nullable|date',
         'data_fim'    => 'nullable|date|after_or_equal:data_inicio',
     ]);
@@ -259,8 +260,10 @@ class InsuranceSummaryController extends Controller
         $this->insuranceSummaryService
             ->getNewCustomersSummary(
                 $csvImportId,
+                $request->group_by ?? 'seguradora',
                 $request->data_inicio,
                 $request->data_fim
+
             )
 
     );

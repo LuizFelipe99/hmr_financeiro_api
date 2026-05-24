@@ -293,10 +293,23 @@ class InsuranceSummaryService
 
 public function getNewCustomersSummary(
     int $csvImportId,
+    string $groupBy = 'seguradora',
     ?string $dataInicio = null,
     ?string $dataFim = null
 )
 {
+    $allowedGroups = [
+        'seguradora',
+        'origem',
+        'produtor',
+        'ramo',
+        'parceiro'
+    ];
+
+    if (!in_array($groupBy, $allowedGroups)) {
+        $groupBy = 'seguradora';
+    }
+
     $query = InsuranceTransaction::query()
 
         ->where('csv_import_id', $csvImportId)
@@ -328,7 +341,7 @@ public function getNewCustomersSummary(
     $clientes = (clone $query)
 
         ->select([
-            'seguradora',
+            $groupBy,
             'descricao',
             'parcela',
             'valor_recebido'
@@ -338,16 +351,16 @@ public function getNewCustomersSummary(
 
         ->get();
 
-    // RESUMO POR SEGURADORA
-    $seguradoras = (clone $query)
+    // AGRUPAMENTO DINÂMICO
+    $dados = (clone $query)
 
-        ->selectRaw('
-            seguradora,
+        ->selectRaw("
+            {$groupBy} as nome,
             COUNT(*) as total_clientes,
             SUM(valor_recebido) as valor_total
-        ')
+        ")
 
-        ->groupBy('seguradora')
+        ->groupBy($groupBy)
 
         ->orderByDesc('valor_total')
 
@@ -356,13 +369,10 @@ public function getNewCustomersSummary(
     $totalGeral = $clientes->sum('valor_recebido');
 
     return [
-
+        'group_by' => $groupBy,
         'total_geral' => round($totalGeral, 2),
-
         'total_clientes' => $clientes->count(),
-
-        'seguradoras' => $seguradoras,
-
+        'dados' => $dados,
         'clientes' => $clientes
 
     ];
