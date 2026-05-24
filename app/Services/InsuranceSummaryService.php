@@ -290,4 +290,63 @@ class InsuranceSummaryService
 
         return $query;
     }
+
+public function getNewCustomersSummary(
+    int $csvImportId,
+    ?string $dataInicio = null,
+    ?string $dataFim = null
+)
+{
+    $query = InsuranceTransaction::query()
+
+        ->where('csv_import_id', $csvImportId)
+
+        ->where(function ($query) {
+
+            $query
+
+                ->whereRaw("
+                    COALESCE(TRIM(parcela), '') = '1'
+                ")
+
+                ->orWhereRaw("
+                    COALESCE(TRIM(parcela), '') LIKE '01%'
+                ")
+
+                ->orWhereRaw("
+                    COALESCE(TRIM(parcela), '') LIKE '1/%'
+                ");
+        });
+
+    $this->applyDateFilter(
+        $query,
+        $dataInicio,
+        $dataFim
+    );
+
+    $clientes = $query
+
+        ->select([
+            'seguradora',
+            'descricao',
+            'parcela',
+            'valor_recebido'
+        ])
+
+        ->orderByDesc('valor_recebido')
+
+        ->get();
+
+    $totalGeral = $clientes->sum('valor_recebido');
+
+    return [
+
+        'total_geral' => round($totalGeral, 2),
+
+        'clientes' => $clientes
+
+    ];
+}
+
+
 }

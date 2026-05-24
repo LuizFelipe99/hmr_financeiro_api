@@ -225,4 +225,44 @@ class InsuranceSummaryController extends Controller
 
         );
     }
+
+    public function newCustomersSummary(
+    Request $request,
+    ?int $csvImportId = null
+)
+{
+    if (!$csvImportId) {
+
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Id da importação é obrigatório'
+        ], 400);
+    }
+
+    $csvImport = CsvImport::find($csvImportId);
+
+    if (!$csvImport) {
+
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Importação não encontrada'
+        ], 404);
+    }
+
+    $request->validate([
+        'data_inicio' => 'nullable|date',
+        'data_fim'    => 'nullable|date|after_or_equal:data_inicio',
+    ]);
+
+    return response()->json(
+
+        $this->insuranceSummaryService
+            ->getNewCustomersSummary(
+                $csvImportId,
+                $request->data_inicio,
+                $request->data_fim
+            )
+
+    );
+}
 }
