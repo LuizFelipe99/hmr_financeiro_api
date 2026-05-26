@@ -22,10 +22,9 @@ Route::get('/debug-transactions', function () {
         Route::get('/me', [AuthController::class, 'me']);
 
         Route::prefix('financial')->group(function () {
-        Route::post('/import', [FinancialTransactionController::class, 'import']);
-        Route::get('/transactions', [FinancialTransactionController::class, 'index']);
-
-        Route::get('/summary/insurance/{csvImportId?}',[FinancialSummaryController::class, 'insurance']);
+            Route::post('/import', [FinancialTransactionController::class, 'import']);
+            Route::get('/transactions', [FinancialTransactionController::class, 'index']);
+            Route::get('/summary/insurance/{csvImportId?}', [FinancialSummaryController::class, 'insurance']);
 
         
         // Route::post('/csv-import', [CsvImportController::class, 'store']);
