@@ -23,4 +23,18 @@ class FinancialSummaryController extends Controller
         'data'=> $summaries,
     ]);
     }
+
+    //fornecedor / seguradoras
+    public function insuranceBySupplier(Request $request, ?int $csvImportId = null)
+    {
+        $summaries = $this->service->insuranceSummaryBySupplier(
+            $csvImportId,
+            $request->query('supplier')
+        );
+
+        return response()->json([
+            'total_liquido' => $summaries->sum('total_liquido'),
+            'data'          => $summaries,
+        ]);
+    }
 }
