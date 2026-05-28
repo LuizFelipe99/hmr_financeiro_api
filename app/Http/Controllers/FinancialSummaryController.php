@@ -98,27 +98,54 @@ class FinancialSummaryController extends Controller
     public function partner(Request $request,int $csvImportId) 
     {
 
-    $request->validate([
-        'data_inicio' => 'nullable|date',
-        'data_fim'    => 'nullable|date|after_or_equal:data_inicio',
+        $request->validate([
+            'data_inicio' => 'nullable|date',
+            'data_fim'    => 'nullable|date|after_or_equal:data_inicio',
 
-        'categorias'   => 'nullable|array',
-        'categorias.*' => 'string',
+            'categorias'   => 'nullable|array',
+            'categorias.*' => 'string',
 
-        'situacoes'   => 'nullable|array',
-        'situacoes.*' => 'string',
-    ]);
+            'situacoes'   => 'nullable|array',
+            'situacoes.*' => 'string',
+        ]);
 
-    return response()->json(
+        return response()->json(
 
-        $this->service->partnerSummary(
-            $csvImportId,
-            $request->input('data_inicio'),
-            $request->input('data_fim'),
-            $request->input('categorias'),
-            $request->input('situacoes')
-        )
+            $this->service->partnerSummary(
+                $csvImportId,
+                $request->input('data_inicio'),
+                $request->input('data_fim'),
+                $request->input('categorias'),
+                $request->input('situacoes')
+            )
 
-    );
-}
+        );
+    }
+
+    public function ramo(Request $request,int $csvImportId) 
+    {
+
+        $request->validate([
+            'data_inicio' => 'nullable|date',
+            'data_fim'    => 'nullable|date|after_or_equal:data_inicio',
+
+            'categorias'   => 'nullable|array',
+            'categorias.*' => 'string',
+
+            'situacoes'   => 'nullable|array',
+            'situacoes.*' => 'string',
+        ]);
+
+        return response()->json(
+
+            $this->service->ramoSummary(
+                $csvImportId,
+                $request->input('data_inicio'),
+                $request->input('data_fim'),
+                $request->input('categorias'),
+                $request->input('situacoes')
+            )
+
+        );
+    }
 }

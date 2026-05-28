@@ -31,6 +31,7 @@ Route::get('/debug-transactions', function () {
             Route::get('/summary/insurance/producer/{csvImportId}',[FinancialSummaryController::class, 'producer']);
             Route::post('/summary/insurance/origin/{csvImportId}',[FinancialSummaryController::class, 'origin']);
             Route::post('/summary/insurance/partner/{csvImportId}',[FinancialSummaryController::class, 'partner']);
+            Route::post('/summary/insurance/ramo/{csvImportId}',[FinancialSummaryController::class, 'ramo']);
 
         
         // Route::post('/csv-import', [CsvImportController::class, 'store']);
