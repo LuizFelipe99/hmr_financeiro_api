@@ -7,6 +7,7 @@ use App\Http\Controllers\InsuranceCsvImportController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FinancialSummaryController;
 use App\Http\Controllers\FinancialTransactionController;
+use App\Http\Controllers\InsuranceSummaryController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -21,11 +22,13 @@ Route::get('/debug-transactions', function () {
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/me', [AuthController::class, 'me']);
 
+
         Route::prefix('financial')->group(function () {
             Route::post('/import', [FinancialTransactionController::class, 'import']);
             Route::get('/transactions', [FinancialTransactionController::class, 'index']);
             Route::get('/summary/insurance/{csvImportId?}', [FinancialSummaryController::class, 'insurance']);
             Route::get('/summary/insurance/supplier/{csvImportId?}', [FinancialSummaryController::class, 'insuranceBySupplier']);
+            Route::get('/summary/insurance/producer/{csvImportId}',[FinancialSummaryController::class, 'producer']);
 
         
         // Route::post('/csv-import', [CsvImportController::class, 'store']);
