@@ -29,7 +29,7 @@ Route::get('/debug-transactions', function () {
             Route::get('/summary/insurance/{csvImportId?}', [FinancialSummaryController::class, 'insurance']);
             Route::get('/summary/insurance/supplier/{csvImportId?}', [FinancialSummaryController::class, 'insuranceBySupplier']);
             Route::get('/summary/insurance/producer/{csvImportId}',[FinancialSummaryController::class, 'producer']);
-            Route::get('/summary/insurance/origin/{csvImportId}',[FinancialSummaryController::class, 'origin']);
+            Route::post('/summary/insurance/origin/{csvImportId}',[FinancialSummaryController::class, 'origin']);
 
         
         // Route::post('/csv-import', [CsvImportController::class, 'store']);

@@ -66,10 +66,20 @@ class FinancialSummaryController extends Controller
         ]);
     }
 
-    public function origin(Request $request,int $csvImportId) {
+    public function origin(
+        Request $request,
+        int $csvImportId
+    ) {
+
         $request->validate([
             'data_inicio' => 'nullable|date',
             'data_fim'    => 'nullable|date|after_or_equal:data_inicio',
+
+            'categorias'   => 'nullable|array',
+            'categorias.*' => 'string',
+
+            'situacoes'    => 'nullable|array',
+            'situacoes.*'  => 'string',
         ]);
 
         return response()->json(
@@ -77,7 +87,9 @@ class FinancialSummaryController extends Controller
             $this->service->originSummary(
                 $csvImportId,
                 $request->data_inicio,
-                $request->data_fim
+                $request->data_fim,
+                $request->categorias,
+                $request->situacoes
             )
 
         );

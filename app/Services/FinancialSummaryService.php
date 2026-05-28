@@ -113,10 +113,7 @@ class FinancialSummaryService
 
         $query = FinancialTransaction::query()
 
-            ->where(
-                'csv_import_id',
-                $csvImportId
-            )
+            ->where('csv_import_id',$csvImportId)
 
             ->where(
                 'situacao',
@@ -156,71 +153,84 @@ class FinancialSummaryService
             ')
 
             ->whereNotNull('produtor')
-
             ->where('produtor', '!=', '')
-
             ->groupBy('produtor')
-
             ->orderByDesc('liquido')
-
             ->get();
     }
 
 
     public function originSummary(
-    int $csvImportId,
-    ?string $dataInicio = null,
-    ?string $dataFim = null
-) {
+        int $csvImportId,
+        ?string $dataInicio = null,
+        ?string $dataFim = null,
+        ?array $categorias = null,
+        ?array $situacoes = null
+    ) {
 
-    $query = FinancialTransaction::query()
+        $query = FinancialTransaction::query()
 
-        ->where(
-            'csv_import_id',
-            $csvImportId
+            ->where(
+                'csv_import_id',
+                $csvImportId
+            );
+
+        $this->applyDateFilter(
+            $query,
+            $dataInicio,
+            $dataFim
         );
 
-    $this->applyDateFilter(
-        $query,
-        $dataInicio,
-        $dataFim
-    );
+        return $query
 
-    return $query
+            ->selectRaw('
+                origem,
 
-        ->selectRaw('
-            origem,
+                COUNT(*) as total_registros,
 
-            COUNT(*) as total_registros,
+                SUM(
+                    CASE
+                        WHEN valor > 0
+                        THEN valor
+                        ELSE 0
+                    END
+                ) as recebimentos,
 
-            SUM(
-                CASE
-                    WHEN valor > 0
-                    THEN valor
-                    ELSE 0
-                END
-            ) as recebimentos,
+                ABS(SUM(
+                    CASE
+                        WHEN valor < 0
+                        THEN valor
+                        ELSE 0
+                    END
+                )) as pagamentos,
 
-            ABS(SUM(
-                CASE
-                    WHEN valor < 0
-                    THEN valor
-                    ELSE 0
-                END
-            )) as pagamentos,
+                SUM(valor) as liquido
+            ')
 
-            SUM(valor) as liquido
-        ')
+            ->when(
+                $situacoes,
+                fn ($query) => $query->whereIn(
+                    'situacao',
+                    $situacoes
+                )
+            )
 
-        ->whereNotNull('origem')
+            ->when(
+                $categorias,
+                fn ($query) => $query->whereIn(
+                    'categoria',
+                    $categorias
+                )
+            )
 
-        ->groupBy('origem')
+            ->whereNotNull('origem')
 
-        ->orderByDesc('liquido')
+            ->groupBy('origem')
 
-        ->get();
-}
+            ->orderByDesc('liquido')
 
+            ->get();
+    }
     private function applyDateFilter(
         $query,
         ?string $dataInicio,
