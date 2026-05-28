@@ -65,4 +65,21 @@ class FinancialSummaryController extends Controller
             'data'          => $summaries,
         ]);
     }
+
+    public function origin(Request $request,int $csvImportId) {
+        $request->validate([
+            'data_inicio' => 'nullable|date',
+            'data_fim'    => 'nullable|date|after_or_equal:data_inicio',
+        ]);
+
+        return response()->json(
+
+            $this->service->originSummary(
+                $csvImportId,
+                $request->data_inicio,
+                $request->data_fim
+            )
+
+        );
+    }
 }

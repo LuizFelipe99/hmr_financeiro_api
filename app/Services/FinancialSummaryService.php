@@ -166,6 +166,61 @@ class FinancialSummaryService
             ->get();
     }
 
+
+    public function originSummary(
+    int $csvImportId,
+    ?string $dataInicio = null,
+    ?string $dataFim = null
+) {
+
+    $query = FinancialTransaction::query()
+
+        ->where(
+            'csv_import_id',
+            $csvImportId
+        );
+
+    $this->applyDateFilter(
+        $query,
+        $dataInicio,
+        $dataFim
+    );
+
+    return $query
+
+        ->selectRaw('
+            origem,
+
+            COUNT(*) as total_registros,
+
+            SUM(
+                CASE
+                    WHEN valor > 0
+                    THEN valor
+                    ELSE 0
+                END
+            ) as recebimentos,
+
+            ABS(SUM(
+                CASE
+                    WHEN valor < 0
+                    THEN valor
+                    ELSE 0
+                END
+            )) as pagamentos,
+
+            SUM(valor) as liquido
+        ')
+
+        ->whereNotNull('origem')
+
+        ->groupBy('origem')
+
+        ->orderByDesc('liquido')
+
+        ->get();
+}
+
     private function applyDateFilter(
         $query,
         ?string $dataInicio,
