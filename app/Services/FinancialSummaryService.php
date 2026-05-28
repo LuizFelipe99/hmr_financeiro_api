@@ -231,6 +231,72 @@ class FinancialSummaryService
 
             ->get();
     }
+
+
+    public function partnerSummary(int $csvImportId,?string $dataInicio = null,?string $dataFim = null,?array $categorias = null,?array $situacoes = null) 
+    {
+
+        $query = FinancialTransaction::query()
+
+            ->where(
+                'csv_import_id',
+                $csvImportId
+            );
+
+        $this->applyDateFilter(
+            $query,
+            $dataInicio,
+            $dataFim
+        );
+
+        return $query
+
+            ->selectRaw('
+                parceiro,
+
+                COUNT(*) as total_registros,
+
+                SUM(
+                    CASE
+                        WHEN valor > 0
+                        THEN valor
+                        ELSE 0
+                    END
+                ) as recebimentos,
+
+                ABS(SUM(
+                    CASE
+                        WHEN valor < 0
+                        THEN valor
+                        ELSE 0
+                    END
+                )) as pagamentos,
+
+                SUM(valor) as liquido
+            ')
+
+            ->when(
+                $situacoes,
+                fn ($query) => $query->whereIn(
+                    'situacao',
+                    $situacoes
+                )
+            )
+
+            ->when(
+                $categorias,
+                fn ($query) => $query->whereIn(
+                    'categoria',
+                    $categorias
+                )
+            )
+
+            ->whereNotNull('parceiro')
+            ->groupBy('parceiro')
+            ->orderByDesc('liquido')
+            ->get();
+    }
+
     private function applyDateFilter(
         $query,
         ?string $dataInicio,

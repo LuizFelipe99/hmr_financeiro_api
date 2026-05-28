@@ -94,4 +94,31 @@ class FinancialSummaryController extends Controller
 
         );
     }
+
+    public function partner(Request $request,int $csvImportId) 
+    {
+
+    $request->validate([
+        'data_inicio' => 'nullable|date',
+        'data_fim'    => 'nullable|date|after_or_equal:data_inicio',
+
+        'categorias'   => 'nullable|array',
+        'categorias.*' => 'string',
+
+        'situacoes'   => 'nullable|array',
+        'situacoes.*' => 'string',
+    ]);
+
+    return response()->json(
+
+        $this->service->partnerSummary(
+            $csvImportId,
+            $request->input('data_inicio'),
+            $request->input('data_fim'),
+            $request->input('categorias'),
+            $request->input('situacoes')
+        )
+
+    );
+}
 }
