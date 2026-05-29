@@ -21,6 +21,7 @@ Route::get('/debug-transactions', function () {
 
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/me', [AuthController::class, 'me']);
+        Route::get('/insurance/imports', [InsuranceCsvImportController::class, 'index']);
 
 
         Route::prefix('financial')->group(function () {
