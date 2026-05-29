@@ -21,7 +21,7 @@ Route::get('/debug-transactions', function () {
 
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/me', [AuthController::class, 'me']);
-        Route::get('/insurance/imports', [InsuranceCsvImportController::class, 'index']);
+        Route::get('/insurance/imports', [FinancialSummaryController::class, 'getImports']);
 
 
         Route::prefix('financial')->group(function () {
@@ -33,6 +33,9 @@ Route::get('/debug-transactions', function () {
             Route::post('/summary/insurance/origin/{csvImportId}',[FinancialSummaryController::class, 'origin']);
             Route::post('/summary/insurance/partner/{csvImportId}',[FinancialSummaryController::class, 'partner']);
             Route::post('/summary/insurance/ramo/{csvImportId}',[FinancialSummaryController::class, 'ramo']);
+            Route::post( '/summary/insurance/date-range/{csvImportId}', [FinancialSummaryController::class, 'summaryByDate']);
+            // routes/api.php
+
 
         
         // Route::post('/csv-import', [CsvImportController::class, 'store']);

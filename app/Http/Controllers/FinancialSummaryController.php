@@ -4,12 +4,23 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\FinancialSummaryService;
+use App\Models\CsvImport;
+use Illuminate\Http\JsonResponse;
 
 class FinancialSummaryController extends Controller
 {
     public function __construct(
         private readonly FinancialSummaryService $service
     ) {}
+
+        public function getImports(): JsonResponse
+    {
+        return response()->json(
+            CsvImport::select('id', 'identifier', 'file_name', 'status', 'total_rows', 'created_at')
+                ->orderByDesc('created_at')
+                ->get()
+        );
+    }
 
     public function insurance(
         Request $request,
@@ -144,6 +155,32 @@ class FinancialSummaryController extends Controller
                 $request->input('data_fim'),
                 $request->input('categorias'),
                 $request->input('situacoes')
+            )
+
+        );
+    }
+
+    // app/Http/Controllers/FinancialSummaryController.php
+
+    public function summaryByDate(
+        Request $request,
+        int $csvImportId
+    ) {
+        $request->validate([
+            'data_inicio' => 'nullable|date',
+            'data_fim'    => 'nullable|date|after_or_equal:data_inicio',
+            'categorias'  => 'nullable|array',
+            'situacoes'   => 'nullable|array',
+        ]);
+
+        return response()->json(
+
+            $this->service->summaryByDate(
+                $csvImportId,
+                $request->data_inicio,
+                $request->data_fim,
+                $request->categorias,
+                $request->situacoes
             )
 
         );

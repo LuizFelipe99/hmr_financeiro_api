@@ -379,4 +379,6 @@ public function getNewCustomersSummary(
 }
 
 
+
+
 }
