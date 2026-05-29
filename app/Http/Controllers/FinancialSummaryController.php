@@ -185,4 +185,33 @@ class FinancialSummaryController extends Controller
 
         );
     }
+
+        public function newCustomers(
+        Request $request,
+        int $csvImportId
+    ) {
+
+        $request->validate([
+            'group_by' => 'nullable|string',
+            'data_inicio' => 'nullable|date',
+            'data_fim' => 'nullable|date|after_or_equal:data_inicio',
+            'categorias' => 'nullable|array',
+            'categorias.*' => 'string',
+            'situacoes' => 'nullable|array',
+            'situacoes.*' => 'string',
+        ]);
+
+        return response()->json(
+
+            $this->service->newCustomersSummary(
+                $csvImportId,
+                $request->group_by ?? 'fornecedor_cliente',
+                $request->data_inicio,
+                $request->data_fim,
+                $request->categorias,
+                $request->situacoes
+            )
+
+        );
+    }
 }

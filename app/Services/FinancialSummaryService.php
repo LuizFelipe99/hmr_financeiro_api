@@ -12,6 +12,7 @@ class FinancialSummaryService
         ?int $csvImportId = null,
         ?string $supplierName = null
     ) {
+
         return FinancialTransaction::query()
 
             ->selectRaw('
@@ -53,6 +54,7 @@ class FinancialSummaryService
         ?int $csvImportId = null,
         ?string $supplierName = null
     ) {
+
         return FinancialTransaction::query()
 
             ->selectRaw('
@@ -113,7 +115,10 @@ class FinancialSummaryService
 
         $query = FinancialTransaction::query()
 
-            ->where('csv_import_id', $csvImportId)
+            ->where(
+                'csv_import_id',
+                $csvImportId
+            )
 
             ->where(
                 'situacao',
@@ -153,12 +158,15 @@ class FinancialSummaryService
             ')
 
             ->whereNotNull('produtor')
+
             ->where('produtor', '!=', '')
+
             ->groupBy('produtor')
+
             ->orderByDesc('liquido')
+
             ->get();
     }
-
 
     public function originSummary(
         int $csvImportId,
@@ -179,6 +187,12 @@ class FinancialSummaryService
             $query,
             $dataInicio,
             $dataFim
+        );
+
+        $this->applyFilters(
+            $query,
+            $categorias,
+            $situacoes
         );
 
         return $query
@@ -207,23 +221,9 @@ class FinancialSummaryService
                 SUM(valor) as liquido
             ')
 
-            ->when(
-                $situacoes,
-                fn($query) => $query->whereIn(
-                    'situacao',
-                    $situacoes
-                )
-            )
-
-            ->when(
-                $categorias,
-                fn($query) => $query->whereIn(
-                    'categoria',
-                    $categorias
-                )
-            )
-
             ->whereNotNull('origem')
+
+            ->where('origem', '!=', '')
 
             ->groupBy('origem')
 
@@ -232,9 +232,13 @@ class FinancialSummaryService
             ->get();
     }
 
-
-    public function partnerSummary(int $csvImportId, ?string $dataInicio = null, ?string $dataFim = null, ?array $categorias = null, ?array $situacoes = null)
-    {
+    public function partnerSummary(
+        int $csvImportId,
+        ?string $dataInicio = null,
+        ?string $dataFim = null,
+        ?array $categorias = null,
+        ?array $situacoes = null
+    ) {
 
         $query = FinancialTransaction::query()
 
@@ -247,6 +251,12 @@ class FinancialSummaryService
             $query,
             $dataInicio,
             $dataFim
+        );
+
+        $this->applyFilters(
+            $query,
+            $categorias,
+            $situacoes
         );
 
         return $query
@@ -275,25 +285,14 @@ class FinancialSummaryService
                 SUM(valor) as liquido
             ')
 
-            ->when(
-                $situacoes,
-                fn($query) => $query->whereIn(
-                    'situacao',
-                    $situacoes
-                )
-            )
-
-            ->when(
-                $categorias,
-                fn($query) => $query->whereIn(
-                    'categoria',
-                    $categorias
-                )
-            )
-
             ->whereNotNull('parceiro')
+
+            ->where('parceiro', '!=', '')
+
             ->groupBy('parceiro')
+
             ->orderByDesc('liquido')
+
             ->get();
     }
 
@@ -316,6 +315,12 @@ class FinancialSummaryService
             $query,
             $dataInicio,
             $dataFim
+        );
+
+        $this->applyFilters(
+            $query,
+            $categorias,
+            $situacoes
         );
 
         return $query
@@ -344,23 +349,9 @@ class FinancialSummaryService
                 SUM(valor) as liquido
             ')
 
-            ->when(
-                $situacoes,
-                fn($query) => $query->whereIn(
-                    'situacao',
-                    $situacoes
-                )
-            )
-
-            ->when(
-                $categorias,
-                fn($query) => $query->whereIn(
-                    'categoria',
-                    $categorias
-                )
-            )
-
             ->whereNotNull('ramo')
+
+            ->where('ramo', '!=', '')
 
             ->groupBy('ramo')
 
@@ -369,77 +360,185 @@ class FinancialSummaryService
             ->get();
     }
 
-    // app/Services/FinancialSummaryService.php
+    public function summaryByDate(
+        int $csvImportId,
+        ?string $dataInicio = null,
+        ?string $dataFim = null,
+        ?array $categorias = null,
+        ?array $situacoes = null
+    ) {
 
-public function summaryByDate(
-    int $csvImportId,
-    ?string $dataInicio = null,
-    ?string $dataFim = null,
-    ?array $categorias = null,
-    ?array $situacoes = null
-) {
+        $query = FinancialTransaction::query()
 
-    $query = FinancialTransaction::query()
+            ->where(
+                'csv_import_id',
+                $csvImportId
+            );
 
-        ->where(
-            'csv_import_id',
-            $csvImportId
+        $this->applyDateFilter(
+            $query,
+            $dataInicio,
+            $dataFim
         );
 
-    $this->applyDateFilter(
-        $query,
-        $dataInicio,
-        $dataFim
-    );
-
-    if (!empty($categorias)) {
-
-        $query->whereIn(
-            'categoria',
-            $categorias
-        );
-    }
-
-    if (!empty($situacoes)) {
-
-        $query->whereIn(
-            'situacao',
+        $this->applyFilters(
+            $query,
+            $categorias,
             $situacoes
         );
+
+        return $query
+
+            ->selectRaw('
+                DATE(data_vencimento) as data,
+
+                COUNT(*) as total_registros,
+
+                SUM(
+                    CASE
+                        WHEN valor > 0
+                        THEN valor
+                        ELSE 0
+                    END
+                ) as recebimentos,
+
+                ABS(SUM(
+                    CASE
+                        WHEN valor < 0
+                        THEN valor
+                        ELSE 0
+                    END
+                )) as pagamentos,
+
+                SUM(valor) as liquido
+            ')
+
+            ->groupBy('data')
+
+            ->orderBy('data')
+
+            ->get();
     }
 
-    return $query
+    public function newCustomersSummary(
+        int $csvImportId,
+        string $groupBy = 'fornecedor_cliente',
+        ?string $dataInicio = null,
+        ?string $dataFim = null,
+        ?array $categorias = null,
+        ?array $situacoes = null
+    ) {
 
-        ->selectRaw('
-            DATE(data_vencimento) as data,
+        $allowedGroups = [
+            'fornecedor_cliente',
+            'origem',
+            'produtor',
+            'ramo',
+            'parceiro'
+        ];
 
-            COUNT(*) as total_registros,
+        if (!in_array($groupBy, $allowedGroups)) {
+            $groupBy = 'fornecedor_cliente';
+        }
 
-            SUM(
-                CASE
-                    WHEN valor > 0
-                    THEN valor
-                    ELSE 0
-                END
-            ) as recebimentos,
+        $query = FinancialTransaction::query()
 
-            ABS(SUM(
-                CASE
-                    WHEN valor < 0
-                    THEN valor
-                    ELSE 0
-                END
-            )) as pagamentos,
+            ->where(
+                'csv_import_id',
+                $csvImportId
+            )
 
-            SUM(valor) as liquido
-        ')
+            ->where(function ($query) {
 
-        ->groupBy('data')
+                $query
 
-        ->orderBy('data')
+                    ->whereRaw("
+                        COALESCE(TRIM(parcela), '') = '1'
+                    ")
 
-        ->get();
-}
+                    ->orWhereRaw("
+                        COALESCE(TRIM(parcela), '') LIKE '01%'
+                    ")
+
+                    ->orWhereRaw("
+                        COALESCE(TRIM(parcela), '') LIKE '1/%'
+                    ");
+            });
+
+        $this->applyDateFilter(
+            $query,
+            $dataInicio,
+            $dataFim
+        );
+
+        $this->applyFilters(
+            $query,
+            $categorias,
+            $situacoes
+        );
+
+        $clientes = (clone $query)
+
+            ->select([
+                $groupBy,
+                'descricao',
+                'parcela',
+                'valor'
+            ])
+
+            ->orderByDesc('valor')
+
+            ->get();
+
+        $dados = (clone $query)
+
+            ->selectRaw("
+                {$groupBy} as nome,
+                COUNT(*) as total_clientes,
+                SUM(valor) as valor_total
+            ")
+
+            ->groupBy($groupBy)
+
+            ->orderByDesc('valor_total')
+
+            ->get();
+
+        $totalGeral = $clientes->sum('valor');
+
+        return [
+            'group_by'       => $groupBy,
+            'total_geral'    => round($totalGeral, 2),
+            'total_clientes' => $clientes->count(),
+            'dados'          => $dados,
+            'clientes'       => $clientes
+        ];
+    }
+
+    private function applyFilters(
+        $query,
+        ?array $categorias = null,
+        ?array $situacoes = null
+    ) {
+
+        if (!empty($categorias)) {
+
+            $query->whereIn(
+                'categoria',
+                $categorias
+            );
+        }
+
+        if (!empty($situacoes)) {
+
+            $query->whereIn(
+                'situacao',
+                $situacoes
+            );
+        }
+
+        return $query;
+    }
 
     private function applyDateFilter(
         $query,

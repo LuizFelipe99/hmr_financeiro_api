@@ -34,6 +34,7 @@ Route::get('/debug-transactions', function () {
             Route::post('/summary/insurance/partner/{csvImportId}',[FinancialSummaryController::class, 'partner']);
             Route::post('/summary/insurance/ramo/{csvImportId}',[FinancialSummaryController::class, 'ramo']);
             Route::post( '/summary/insurance/date-range/{csvImportId}', [FinancialSummaryController::class, 'summaryByDate']);
+            Route::post('/summary/insurance/new-customers/{csvImportId}', [FinancialSummaryController::class,'newCustomers']);
             // routes/api.php
 
 
